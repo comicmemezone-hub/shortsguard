@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">ShortsGuard</string>
+    <string name="accessibility_service_label">ShortsGuard Blocker</string>
+    <string name="accessibility_service_description">Monitors and automatically exits YouTube Shorts, browser shorts/reels, and distracting feed tabs to keep your focus intact.</string>
+
+    <string name="service_status_active">Shield Active (Running)</string>
+    <string name="service_status_inactive">Shield Disabled (Tap to Enable)</string>
+    <string name="enable_service_btn">Enable in Accessibility Settings</string>
+
+    <string name="category_block_targets">Blocking Preferences</string>
+    <string name="hide_shorts_button_title">Visually Hide Shorts Button</string>
+    <string name="hide_shorts_button_desc">Places a protective screen mask over the Shorts button so it is covered and unclickable</string>
+
+    <string name="block_youtube_title">Block YouTube Shorts</string>
+    <string name="block_youtube_desc">Auto-exits Shorts feed and reel player</string>
+
+    <string name="block_chrome_title">Block Chrome / Browser Shorts</string>
+    <string name="block_chrome_desc">Blocks youtube.com/shorts and reels in Chrome</string>
+
+    <string name="block_whatsapp_title">Block WhatsApp Updates / Status</string>
+    <string name="block_whatsapp_desc">Auto-exits status and channels feeds</string>
+
+    <string name="block_alert_toast">🛡️ Shorts blocked by ShortsGuard!</string>
+    <string name="stats_title">Shorts Blocked</string>
+    <string name="stats_today">Blocked today: %1$d</string>
+</resources>
