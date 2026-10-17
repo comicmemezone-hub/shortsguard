@@ -330,11 +330,20 @@ class ShortsBlockerService : AccessibilityService() {
         performGlobalAction(GLOBAL_ACTION_BACK)
 
         val todayCount = BlockPreferences.incrementBlockedCount(this)
+        val isLockdown = BlockPreferences.isLockdownActive(this)
 
         mainHandler.post {
+            val message = if (isLockdown) {
+                val remaining = BlockPreferences.getRemainingLockdownMillis(this)
+                val timeStr = BlockPreferences.formatRemainingTime(remaining)
+                "🔒 STRICT LOCKDOWN ACTIVE! ($timeStr remaining)\n$source blocked!"
+            } else {
+                "🛡️ $source blocked! (Blocked $todayCount today)"
+            }
+
             Toast.makeText(
                 applicationContext,
-                "🛡️ $source blocked! (Blocked $todayCount today)",
+                message,
                 Toast.LENGTH_SHORT
             ).show()
         }
