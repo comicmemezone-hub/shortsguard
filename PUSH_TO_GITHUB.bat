@@ -18,8 +18,8 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 :: Check current remote
-set CURRENT_REMOTE=
-for /f "tokens=*" %%i in ('git remote get-url origin 2^>nul') do set CURRENT_REMOTE=%%i
+set "CURRENT_REMOTE="
+for /f "tokens=*" %%i in ('git remote get-url origin 2^>nul') do set "CURRENT_REMOTE=%%i"
 
 if "%CURRENT_REMOTE%"=="" (
     echo [INFO] No GitHub repository linked yet.
@@ -29,9 +29,16 @@ if "%CURRENT_REMOTE%"=="" (
     echo.
     set "REPO_URL="
     set /p "REPO_URL=Paste your GitHub Repository URL here: "
+    if not defined REPO_URL (
+        echo.
+        echo [ERROR] Repository URL was empty. Exiting.
+        echo.
+        pause
+        exit /b 1
+    )
     if "!REPO_URL!"=="" (
         echo.
-        echo [ERROR] Repository URL was empty. Operation cancelled.
+        echo [ERROR] Repository URL was empty. Exiting.
         echo.
         pause
         exit /b 1
@@ -47,10 +54,12 @@ if "%CURRENT_REMOTE%"=="" (
     if /i "!CHANGE!"=="y" (
         set "REPO_URL="
         set /p "REPO_URL=Paste new GitHub Repository URL: "
-        if not "!REPO_URL!"=="" (
-            git remote set-url origin !REPO_URL!
-            echo.
-            echo [OK] Updated remote: !REPO_URL!
+        if defined REPO_URL (
+            if not "!REPO_URL!"=="" (
+                git remote set-url origin !REPO_URL!
+                echo.
+                echo [OK] Updated remote: !REPO_URL!
+            )
         )
     )
 )
