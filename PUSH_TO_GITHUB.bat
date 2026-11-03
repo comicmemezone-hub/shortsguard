@@ -21,28 +21,35 @@ if %ERRORLEVEL% NEQ 0 (
 set CURRENT_REMOTE=
 for /f "tokens=*" %%i in ('git remote get-url origin 2^>nul') do set CURRENT_REMOTE=%%i
 
-if "!CURRENT_REMOTE!"=="" (
+if "%CURRENT_REMOTE%"=="" (
     echo [INFO] No GitHub repository linked yet.
     echo.
-    echo Please create an empty repository on https://github.com/new
-    echo Example URL: https://github.com/your-username/ShortsGuard.git
+    echo 1. Go to https://github.com/new and create an empty repository
+    echo 2. Copy the URL (example: https://github.com/your-username/ShortsGuard.git)
     echo.
-    set /p REPO_URL="Paste your GitHub Repository URL here: "
+    set "REPO_URL="
+    set /p "REPO_URL=Paste your GitHub Repository URL here: "
     if "!REPO_URL!"=="" (
-        echo [ERROR] Repository URL cannot be empty!
+        echo.
+        echo [ERROR] Repository URL was empty. Operation cancelled.
+        echo.
         pause
         exit /b 1
     )
     git remote add origin !REPO_URL!
+    echo.
     echo [OK] Added remote: !REPO_URL!
 ) else (
-    echo [INFO] Current GitHub repository: !CURRENT_REMOTE!
+    echo [INFO] Currently linked to: %CURRENT_REMOTE%
     echo.
-    set /p CHANGE="Do you want to change this repository URL? (y/N): "
+    set "CHANGE=N"
+    set /p "CHANGE=Do you want to change this repository URL? (y/N): "
     if /i "!CHANGE!"=="y" (
-        set /p REPO_URL="Paste new GitHub Repository URL: "
+        set "REPO_URL="
+        set /p "REPO_URL=Paste new GitHub Repository URL: "
         if not "!REPO_URL!"=="" (
             git remote set-url origin !REPO_URL!
+            echo.
             echo [OK] Updated remote: !REPO_URL!
         )
     )
@@ -71,9 +78,9 @@ if %ERRORLEVEL% EQU 0 (
 ) else (
     echo.
     echo ==========================================================
-    echo   [NOTICE] If push failed, make sure:
-    echo   1. The repository exists on your GitHub account.
-    echo   2. You are signed into GitHub.
+    echo   [NOTICE] If the push failed:
+    echo   1. Make sure you created the repo on https://github.com/new
+    echo   2. Sign in when Windows/Git prompts you for GitHub login
     echo ==========================================================
 )
 
