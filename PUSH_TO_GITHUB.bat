@@ -75,7 +75,7 @@ git commit -m "Update ShortsGuard app" >nul 2>&1
 echo.
 echo [3/3] Pushing to GitHub (branch: main)...
 git branch -M main
-git push -u origin main
+git push -u origin main --force
 
 if %ERRORLEVEL% EQU 0 (
     echo.
