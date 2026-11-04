@@ -12,6 +12,8 @@ object BlockPreferences {
 
     private const val KEY_HIDE_SHORTS_BUTTON = "hide_shorts_button"
     private const val KEY_BLOCK_YOUTUBE = "block_youtube"
+    private const val KEY_BLOCK_INSTAGRAM = "block_instagram"
+    private const val KEY_BLOCK_FACEBOOK = "block_facebook"
     private const val KEY_BLOCK_CHROME = "block_chrome"
     private const val KEY_BLOCK_WHATSAPP = "block_whatsapp"
 
@@ -32,6 +34,8 @@ object BlockPreferences {
             .putLong(KEY_LOCKDOWN_DEADLINE_MS, targetDeadline)
             .putBoolean(KEY_HIDE_SHORTS_BUTTON, true)
             .putBoolean(KEY_BLOCK_YOUTUBE, true)
+            .putBoolean(KEY_BLOCK_INSTAGRAM, true)
+            .putBoolean(KEY_BLOCK_FACEBOOK, true)
             .putBoolean(KEY_BLOCK_CHROME, true)
             .putBoolean(KEY_BLOCK_WHATSAPP, true)
             .apply()
@@ -42,6 +46,8 @@ object BlockPreferences {
             .putLong(KEY_LOCKDOWN_DEADLINE_MS, targetDeadlineMs)
             .putBoolean(KEY_HIDE_SHORTS_BUTTON, true)
             .putBoolean(KEY_BLOCK_YOUTUBE, true)
+            .putBoolean(KEY_BLOCK_INSTAGRAM, true)
+            .putBoolean(KEY_BLOCK_FACEBOOK, true)
             .putBoolean(KEY_BLOCK_CHROME, true)
             .putBoolean(KEY_BLOCK_WHATSAPP, true)
             .apply()
@@ -94,7 +100,7 @@ object BlockPreferences {
     }
 
     fun setHideShortsButtonEnabled(context: Context, enabled: Boolean) {
-        if (isLockdownActive(context)) return // Locked during deadline
+        if (isLockdownActive(context)) return
         getPrefs(context).edit().putBoolean(KEY_HIDE_SHORTS_BUTTON, enabled).apply()
     }
 
@@ -104,8 +110,28 @@ object BlockPreferences {
     }
 
     fun setYoutubeBlockEnabled(context: Context, enabled: Boolean) {
-        if (isLockdownActive(context)) return // Locked during deadline
+        if (isLockdownActive(context)) return
         getPrefs(context).edit().putBoolean(KEY_BLOCK_YOUTUBE, enabled).apply()
+    }
+
+    fun isInstagramBlockEnabled(context: Context): Boolean {
+        if (isLockdownActive(context)) return true
+        return getPrefs(context).getBoolean(KEY_BLOCK_INSTAGRAM, true)
+    }
+
+    fun setInstagramBlockEnabled(context: Context, enabled: Boolean) {
+        if (isLockdownActive(context)) return
+        getPrefs(context).edit().putBoolean(KEY_BLOCK_INSTAGRAM, enabled).apply()
+    }
+
+    fun isFacebookBlockEnabled(context: Context): Boolean {
+        if (isLockdownActive(context)) return true
+        return getPrefs(context).getBoolean(KEY_BLOCK_FACEBOOK, true)
+    }
+
+    fun setFacebookBlockEnabled(context: Context, enabled: Boolean) {
+        if (isLockdownActive(context)) return
+        getPrefs(context).edit().putBoolean(KEY_BLOCK_FACEBOOK, enabled).apply()
     }
 
     fun isChromeBlockEnabled(context: Context): Boolean {
@@ -114,7 +140,7 @@ object BlockPreferences {
     }
 
     fun setChromeBlockEnabled(context: Context, enabled: Boolean) {
-        if (isLockdownActive(context)) return // Locked during deadline
+        if (isLockdownActive(context)) return
         getPrefs(context).edit().putBoolean(KEY_BLOCK_CHROME, enabled).apply()
     }
 
@@ -124,7 +150,7 @@ object BlockPreferences {
     }
 
     fun setWhatsappBlockEnabled(context: Context, enabled: Boolean) {
-        if (isLockdownActive(context)) return // Locked during deadline
+        if (isLockdownActive(context)) return
         getPrefs(context).edit().putBoolean(KEY_BLOCK_WHATSAPP, enabled).apply()
     }
 

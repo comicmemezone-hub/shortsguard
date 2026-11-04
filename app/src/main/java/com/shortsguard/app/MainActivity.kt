@@ -72,6 +72,24 @@ class MainActivity : AppCompatActivity() {
             BlockPreferences.setYoutubeBlockEnabled(this, isChecked)
         }
 
+        binding.switchInstagram.setOnCheckedChangeListener { _, isChecked ->
+            if (BlockPreferences.isLockdownActive(this)) {
+                binding.switchInstagram.isChecked = true
+                showLockdownToast()
+                return@setOnCheckedChangeListener
+            }
+            BlockPreferences.setInstagramBlockEnabled(this, isChecked)
+        }
+
+        binding.switchFacebook.setOnCheckedChangeListener { _, isChecked ->
+            if (BlockPreferences.isLockdownActive(this)) {
+                binding.switchFacebook.isChecked = true
+                showLockdownToast()
+                return@setOnCheckedChangeListener
+            }
+            BlockPreferences.setFacebookBlockEnabled(this, isChecked)
+        }
+
         binding.switchChrome.setOnCheckedChangeListener { _, isChecked ->
             if (BlockPreferences.isLockdownActive(this)) {
                 binding.switchChrome.isChecked = true
@@ -184,6 +202,14 @@ class MainActivity : AppCompatActivity() {
                 isChecked = true
                 isEnabled = false
             }
+            binding.switchInstagram.apply {
+                isChecked = true
+                isEnabled = false
+            }
+            binding.switchFacebook.apply {
+                isChecked = true
+                isEnabled = false
+            }
             binding.switchChrome.apply {
                 isChecked = true
                 isEnabled = false
@@ -219,6 +245,8 @@ class MainActivity : AppCompatActivity() {
             // Re-enable toggles
             binding.switchHideShortsButton.isEnabled = true
             binding.switchYoutube.isEnabled = true
+            binding.switchInstagram.isEnabled = true
+            binding.switchFacebook.isEnabled = true
             binding.switchChrome.isEnabled = true
             binding.switchWhatsapp.isEnabled = true
 
@@ -233,6 +261,8 @@ class MainActivity : AppCompatActivity() {
     private fun loadSwitchStates() {
         binding.switchHideShortsButton.isChecked = BlockPreferences.isHideShortsButtonEnabled(this)
         binding.switchYoutube.isChecked = BlockPreferences.isYoutubeBlockEnabled(this)
+        binding.switchInstagram.isChecked = BlockPreferences.isInstagramBlockEnabled(this)
+        binding.switchFacebook.isChecked = BlockPreferences.isFacebookBlockEnabled(this)
         binding.switchChrome.isChecked = BlockPreferences.isChromeBlockEnabled(this)
         binding.switchWhatsapp.isChecked = BlockPreferences.isWhatsappBlockEnabled(this)
     }

@@ -3,8 +3,10 @@
 **ShortsGuard** is a 100% free, private, on-device Android app designed to completely block doomscrolling feeds across your phone:
 * **🔒 Unbreakable Deadline Lockdown Mode:** Set a deadline (30 min, 1h, 2h, 4h, 8h, or custom time). Once activated, all blocking settings are locked ON and CANNOT be disabled or toggled off until the countdown deadline expires.
 * **Visually Hide Shorts Button:** Places a sleek, protective mask over the bottom Shorts button in the YouTube app so the button is completely covered, hidden, and unclickable!
-* **Pre-emptive Click Interception:** Tapping the Shorts area is caught instantly before YouTube can even buffer or open the player.
+* **Pre-emptive Click Interception:** Tapping the Shorts or Reels area is caught instantly before the app can even buffer or open the player.
 * **YouTube App:** Auto-exits any opened Shorts feed or Reel player.
+* **Instagram App:** Auto-exits Reels tab, clips viewer, and full-screen reels.
+* **Facebook App:** Auto-exits Facebook Reels & Shorts viewer.
 * **Chrome / Mobile Browsers:** Detects `youtube.com/shorts`, `instagram.com/reels`, and `tiktok.com` in the URL bar and backs out automatically.
 * **WhatsApp:** Blocks the distracting "Updates" / "Status" feed and playback.
 

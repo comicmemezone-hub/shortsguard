@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">ShortsGuard</string>
     <string name="accessibility_service_label">ShortsGuard Blocker</string>
-    <string name="accessibility_service_description">Monitors and automatically exits YouTube Shorts, browser shorts/reels, and distracting feed tabs to keep your focus intact.</string>
+    <string name="accessibility_service_description">Monitors and automatically exits YouTube Shorts, Instagram Reels, Facebook Reels, and distracting feeds to protect your focus.</string>
 
     <string name="service_status_active">Shield Active (Running)</string>
     <string name="service_status_inactive">Shield Disabled (Tap to Enable)</string>
@@ -13,6 +13,12 @@
 
     <string name="block_youtube_title">Block YouTube Shorts</string>
     <string name="block_youtube_desc">Auto-exits Shorts feed and reel player</string>
+
+    <string name="block_instagram_title">Block Instagram Reels</string>
+    <string name="block_instagram_desc">Auto-exits Reels tab and reel viewer</string>
+
+    <string name="block_facebook_title">Block Facebook Reels</string>
+    <string name="block_facebook_desc">Auto-exits Facebook Shorts and Reels feed</string>
 
     <string name="block_chrome_title">Block Chrome / Browser Shorts</string>
     <string name="block_chrome_desc">Blocks youtube.com/shorts and reels in Chrome</string>

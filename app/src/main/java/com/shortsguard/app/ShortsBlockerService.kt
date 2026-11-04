@@ -31,7 +31,13 @@ class ShortsBlockerService : AccessibilityService() {
         var isServiceRunning: Boolean = false
             private set
 
+        private const val PKG_OUR_APP = "com.shortsguard.app"
         private const val PKG_YOUTUBE = "com.google.android.youtube"
+        private const val PKG_INSTAGRAM = "com.instagram.android"
+        private val FACEBOOK_PACKAGES = setOf(
+            "com.facebook.katana",
+            "com.facebook.lite"
+        )
         private val CHROME_PACKAGES = setOf(
             "com.android.chrome",
             "com.chrome.beta",
@@ -42,6 +48,9 @@ class ShortsBlockerService : AccessibilityService() {
             "com.whatsapp",
             "com.whatsapp.w4b"
         )
+
+        private val ALL_TARGET_PACKAGES = setOf(PKG_YOUTUBE, PKG_INSTAGRAM) +
+                FACEBOOK_PACKAGES + CHROME_PACKAGES + WHATSAPP_PACKAGES
     }
 
     override fun onServiceConnected() {
@@ -66,17 +75,24 @@ class ShortsBlockerService : AccessibilityService() {
 
         val packageName = event.packageName?.toString() ?: return
 
-        // 1. Hide overlay when user is not inside YouTube
+        // 1. NEVER block inside ShortsGuard itself!
+        if (packageName == PKG_OUR_APP || packageName == applicationContext.packageName) {
+            return
+        }
+
+        // 2. Hide YouTube overlay mask when outside YouTube
         if (packageName != PKG_YOUTUBE) {
             removeOverlayMask()
         }
 
-        // 2. Pre-emptive Click Interception: Catch the tap on "Shorts" BEFORE it opens
-        if (event.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED) {
+        // 3. Pre-emptive Click Interception: Catch clicks on "Shorts" or "Reels" ONLY inside target apps
+        if (event.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED && ALL_TARGET_PACKAGES.contains(packageName)) {
             val text = event.text.joinToString(" ")
             val desc = event.contentDescription?.toString() ?: ""
-            if (text.contains("Shorts", ignoreCase = true) || desc.contains("Shorts", ignoreCase = true)) {
-                triggerBlockAction("Shorts Button Click")
+            if (text.contains("Shorts", ignoreCase = true) || desc.contains("Shorts", ignoreCase = true) ||
+                text.contains("Reels", ignoreCase = true) || desc.contains("Reels", ignoreCase = true)
+            ) {
+                triggerBlockAction("Shorts/Reels Tab Click")
                 return
             }
         }
@@ -89,6 +105,12 @@ class ShortsBlockerService : AccessibilityService() {
         when {
             packageName == PKG_YOUTUBE && BlockPreferences.isYoutubeBlockEnabled(this) -> {
                 handleYoutubeEvent(event)
+            }
+            packageName == PKG_INSTAGRAM && BlockPreferences.isInstagramBlockEnabled(this) -> {
+                handleInstagramEvent(event)
+            }
+            FACEBOOK_PACKAGES.contains(packageName) && BlockPreferences.isFacebookBlockEnabled(this) -> {
+                handleFacebookEvent(event)
             }
             CHROME_PACKAGES.contains(packageName) && BlockPreferences.isChromeBlockEnabled(this) -> {
                 handleChromeEvent(event)
@@ -105,7 +127,6 @@ class ShortsBlockerService : AccessibilityService() {
     private fun handleYoutubeEvent(event: AccessibilityEvent) {
         val className = event.className?.toString() ?: ""
 
-        // 1. If user is already on a Shorts/Reel activity -> Exit immediately
         if (className.contains("ReelWatchActivity", ignoreCase = true) ||
             className.contains("ShortsActivity", ignoreCase = true)
         ) {
@@ -115,7 +136,6 @@ class ShortsBlockerService : AccessibilityService() {
 
         val rootNode = rootInActiveWindow ?: return
         try {
-            // 2. Visually mask and hide the Shorts button if enabled
             if (BlockPreferences.isHideShortsButtonEnabled(this) && Settings.canDrawOverlays(this)) {
                 val shortsNode = findShortsButtonNode(rootNode)
                 if (shortsNode != null) {
@@ -128,7 +148,6 @@ class ShortsBlockerService : AccessibilityService() {
                 }
             }
 
-            // 3. Check if Shorts player view is actively showing
             if (isShortsPlayerActive(rootNode)) {
                 triggerBlockAction("YouTube Shorts")
             }
@@ -138,8 +157,112 @@ class ShortsBlockerService : AccessibilityService() {
     }
 
     /**
-     * Finds the Shorts button node in the bottom navigation bar
+     * Blocks Instagram Reels
      */
+    private fun handleInstagramEvent(event: AccessibilityEvent) {
+        val className = event.className?.toString() ?: ""
+
+        if (className.contains("ClipsViewerActivity", ignoreCase = true) ||
+            className.contains("ReelsViewerActivity", ignoreCase = true) ||
+            className.contains("ClipsWatchWhileActivity", ignoreCase = true)
+        ) {
+            triggerBlockAction("Instagram Reels")
+            return
+        }
+
+        val rootNode = rootInActiveWindow ?: return
+        try {
+            if (isInstagramReelsActive(rootNode)) {
+                triggerBlockAction("Instagram Reels")
+            }
+        } finally {
+            rootNode.recycle()
+        }
+    }
+
+    private fun isInstagramReelsActive(node: AccessibilityNodeInfo): Boolean {
+        val viewId = node.viewIdResourceName ?: ""
+        val desc = node.contentDescription?.toString() ?: ""
+        val text = node.text?.toString() ?: ""
+
+        if (viewId.contains("clips_viewer", ignoreCase = true) ||
+            viewId.contains("clips_video_container", ignoreCase = true) ||
+            viewId.contains("clips_media_component", ignoreCase = true) ||
+            viewId.contains("reel_viewer", ignoreCase = true)
+        ) {
+            return true
+        }
+
+        if ((desc.equals("Reels", ignoreCase = true) || text.equals("Reels", ignoreCase = true)) &&
+            (node.isSelected || node.isFocused)
+        ) {
+            return true
+        }
+
+        val childCount = node.childCount
+        for (i in 0 until childCount) {
+            val child = node.getChild(i) ?: continue
+            val found = isInstagramReelsActive(child)
+            child.recycle()
+            if (found) return true
+        }
+        return false
+    }
+
+    /**
+     * Blocks Facebook Reels
+     */
+    private fun handleFacebookEvent(event: AccessibilityEvent) {
+        val className = event.className?.toString() ?: ""
+
+        if (className.contains("FbShortsViewerActivity", ignoreCase = true) ||
+            className.contains("FbShortsUnifiedViewerActivity", ignoreCase = true) ||
+            className.contains("FbShortsActivity", ignoreCase = true) ||
+            className.contains("ReelsMediaViewerActivity", ignoreCase = true)
+        ) {
+            triggerBlockAction("Facebook Reels")
+            return
+        }
+
+        val rootNode = rootInActiveWindow ?: return
+        try {
+            if (isFacebookReelsActive(rootNode)) {
+                triggerBlockAction("Facebook Reels")
+            }
+        } finally {
+            rootNode.recycle()
+        }
+    }
+
+    private fun isFacebookReelsActive(node: AccessibilityNodeInfo): Boolean {
+        val viewId = node.viewIdResourceName ?: ""
+        val desc = node.contentDescription?.toString() ?: ""
+        val text = node.text?.toString() ?: ""
+
+        if (viewId.contains("fb_shorts", ignoreCase = true) ||
+            viewId.contains("fb_reels", ignoreCase = true) ||
+            viewId.contains("reel_video_view", ignoreCase = true)
+        ) {
+            return true
+        }
+
+        if ((desc.contains("Watch Reels", ignoreCase = true) || text.contains("Watch Reels", ignoreCase = true) ||
+                    desc.equals("Reels", ignoreCase = true) || text.equals("Reels", ignoreCase = true)) &&
+            (node.isSelected || node.isFocused)
+        ) {
+            return true
+        }
+
+        val childCount = node.childCount
+        for (i in 0 until childCount) {
+            val child = node.getChild(i) ?: continue
+            val found = isFacebookReelsActive(child)
+            child.recycle()
+            if (found) return true
+        }
+        return false
+    }
+
     private fun findShortsButtonNode(node: AccessibilityNodeInfo): AccessibilityNodeInfo? {
         val desc = node.contentDescription?.toString() ?: ""
         val text = node.text?.toString() ?: ""
@@ -158,15 +281,11 @@ class ShortsBlockerService : AccessibilityService() {
         return null
     }
 
-    /**
-     * Positions a physical overlay over the Shorts button so it is visually covered and unclickable
-     */
     private fun applyOverlayMask(bounds: Rect) {
         mainHandler.post {
             try {
                 if (windowManager == null) return@post
 
-                // Avoid unnecessary redraws if bounds haven't changed
                 if (isOverlayAttached && lastOverlayBounds == bounds) {
                     return@post
                 }
@@ -194,9 +313,7 @@ class ShortsBlockerService : AccessibilityService() {
 
                 if (overlayMaskView == null) {
                     overlayMaskView = View(this).apply {
-                        // YouTube's dark bottom-bar background color #0F0F0F
                         setBackgroundColor(Color.parseColor("#0F0F0F"))
-                        // Intercept touches on the masked area
                         setOnClickListener {
                             Toast.makeText(applicationContext, "🛡️ Shorts Button is Disabled!", Toast.LENGTH_SHORT).show()
                         }
@@ -210,7 +327,6 @@ class ShortsBlockerService : AccessibilityService() {
                     windowManager?.updateViewLayout(overlayMaskView, params)
                 }
             } catch (e: Exception) {
-                // Ignore window manager race conditions
             }
         }
     }
@@ -224,7 +340,6 @@ class ShortsBlockerService : AccessibilityService() {
                     lastOverlayBounds.setEmpty()
                 }
             } catch (e: Exception) {
-                // Ignore if already removed
             }
         }
     }
